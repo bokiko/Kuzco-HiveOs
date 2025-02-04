@@ -1,4 +1,4 @@
-# Kuzco Worker Setup for Mining Rigs
+# Kuzco Worker Setup for Mining Rigs using HiveOs
 
 <div align="center">
 
