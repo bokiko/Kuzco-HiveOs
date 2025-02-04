@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![Kuzco Github]([add_logo_here](https://github.com/context-labs))
+![Kuzco Github]([[add_logo_here](https://avatars.githubusercontent.com/u/125929854?s=200&v=4)](https://github.com/context-labs))
 
 Setup guide for running Kuzco workers on mining rigs with NVIDIA GPUs.
 
