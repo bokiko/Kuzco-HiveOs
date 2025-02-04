@@ -2,12 +2,14 @@
 
 <div align="center">
 
-![Kuzco Github]([[https://avatars.githubusercontent.com/u/125929854?s=200&v=4](https://avatars.githubusercontent.com/u/125929854?s=200&v=4)](https://github.com/context-labs))
+<img src="https://avatars.githubusercontent.com/u/125929854?s=200&v=4" alt="Kuzco Logo" width="200"/>
 
 Setup guide for running Kuzco workers on mining rigs with NVIDIA GPUs.
 
 [![Discord](https://img.shields.io/discord/YOUR_DISCORD_ID)](https://discord.gg/kuzco)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Documentation](https://img.shields.io/badge/docs-kuzco-blue)](https://docs.kuzco.xyz/)
+[![GitHub](https://img.shields.io/badge/github-context--labs-black)](https://github.com/context-labs)
 
 </div>
 
@@ -23,7 +25,7 @@ Before proceeding with installation, ensure:
 
 ## Table of Contents
 
-- [Prerequisites](#prerequisites)
+- [Hardware Requirements](#hardware-requirements)
 - [Installation](#installation)
 - [Worker Setup](#worker-setup)
 - [Multi-GPU Configuration](#multi-gpu-configuration)
@@ -31,14 +33,26 @@ Before proceeding with installation, ensure:
 - [Troubleshooting](#troubleshooting)
 - [Mining Compatibility](#mining-compatibility)
 
-## Prerequisites
+## Hardware Requirements
 
-Required:
+### Supported GPUs:
+- NVIDIA RTX 4090
+- NVIDIA RTX 4080
+- NVIDIA RTX 3090 Ti
+- NVIDIA RTX 3090
+- NVIDIA RTX 3080 Ti
+- NVIDIA RTX 3080
+- NVIDIA A100
+
+For detailed hardware specifications and requirements, visit the [official hardware documentation](https://docs.kuzco.xyz/hardware).
+
+Additional Requirements:
 - HiveOS or Linux-based mining OS
-- NVIDIA GPUs (check [supported list](https://kuzco.xyz))
 - Docker support
 - SSH access
 - Stable internet connection
+- At least 8GB system RAM
+- Sufficient power supply for full GPU utilization
 
 ## Installation
 
@@ -144,6 +158,7 @@ tmux attach -t kuzco0
 - Ensure adequate cooling
 - Start with lighter algorithms if mining
 - Consider reducing mining intensity
+- Test stability before running alongside mining operations
 
 ## Troubleshooting
 
@@ -167,7 +182,8 @@ docker logs $(docker ps -q --filter ancestor=kuzcoxyz/amd64-ollama-nvidia-worker
 ## Support
 
 - Join [Discord](https://discord.gg/kuzco) for support
-- Check [Documentation](https://docs.kuzco.xyz)
+- Check [Official Documentation](https://docs.kuzco.xyz)
+- Visit [GitHub Repository](https://github.com/context-labs)
 - Report issues in [GitHub Issues](issues)
 
 ## Disclaimer
