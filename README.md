@@ -51,8 +51,9 @@ Additional Requirements:
 - Docker support
 - SSH access
 - Stable internet connection
-- At least 8GB system RAM
+- At least 16GB system RAM
 - Sufficient power supply for full GPU utilization
+- Update both HiveOs and Nvidia Drivers before begining
 
 ## Installation
 
