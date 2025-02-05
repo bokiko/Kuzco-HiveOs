@@ -90,6 +90,8 @@ docker run --restart=always --runtime=nvidia --gpus "device=0" \
     --worker YOUR_WORKER_ID \
     --code YOUR_CODE
 ```
+Edit the command by adding your `YOUR_WORKER_ID` and `YOUR_CODE` you copied earlier
+.
 
 To detach from tmux: Press `Ctrl+B`, then `D`
 
