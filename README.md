@@ -1,32 +1,41 @@
 # Kuzco Worker Setup for HiveOS Mining Rigs
 
 <div align="center">
-
 <img src="https://avatars.githubusercontent.com/u/125929854?s=200&v=4" alt="Kuzco Logo" width="200"/>
 
-Setup guide for running Kuzco workers on HiveOS mining rigs with NVIDIA GPUs.
+### Setup guide for running Kuzco workers on HiveOS mining rigs with NVIDIA GPUs
 
 [![Documentation](https://img.shields.io/badge/docs-kuzco-blue)](https://docs.kuzco.xyz/)
 [![GitHub](https://img.shields.io/badge/github-context--labs-black)](https://github.com/context-labs)
 
 </div>
-What is Kuzco?
+
+---
+
+## 📖 Introduction
+
+### What is Kuzco?
+
 Kuzco Testnet is a distributed network where GPU owners can contribute their computing power to run AI inference tasks for large language models like Llama3, Mistral, and others. As a testnet operator, you can earn $KZO points by connecting your GPUs to the network. The earning potential scales with the number of GPUs you contribute.
 
-⚠️ Important Note: Kuzco Testnet is in early development. Expect occasional bugs and downtime periods. The team actively communicates updates through the Operator Discord. While not yet production-ready, the network is continuously being improved and enhanced.
+### ⚠️ Important Note
+
+Kuzco Testnet is in early development. Expect occasional bugs and downtime periods. The team actively communicates updates through the Operator Discord. While not yet production-ready, the network is continuously being improved and enhanced.
 
 For bug reports or issues, please open a ticket in Discord with detailed information. Stay updated about network status through the Discord announcements channel.
 
-## ⚠️ Important Requirements
+---
 
-Before starting, ensure you have:
+## 🔍 Requirements
+
+### System Requirements
 - HiveOS updated to latest version
 - NVIDIA drivers updated
 - 16GB RAM minimum
 - All mining operations stopped
 - Stable internet connection
 
-## Supported GPUs
+### Supported GPUs
 - NVIDIA RTX 4090
 - NVIDIA RTX 4080
 - NVIDIA RTX 3090 Ti
@@ -37,7 +46,9 @@ Before starting, ensure you have:
 
 For detailed specifications, visit [hardware requirements](https://docs.kuzco.xyz/hardware).
 
-## Step-by-Step Installation
+---
+
+## 🛠️ Installation Guide
 
 ### 1. Update System & Install Required Packages
 ```bash
@@ -70,7 +81,7 @@ Create a new tmux session:
 tmux new -s kuzco0
 ```
 
-Inside the tmux session, run your worker (replace with your credentials):
+Inside the tmux session, run your worker:
 ```bash
 docker run --restart=always --runtime=nvidia --gpus "device=0" \
     -e CACHE_DIRECTORY=/root/models \
@@ -82,9 +93,12 @@ docker run --restart=always --runtime=nvidia --gpus "device=0" \
 
 To detach from tmux: Press `Ctrl+B`, then `D`
 
-### 5. Running Multiple GPUs
+---
+
+## 🔄 Multiple GPU Setup
 
 For each additional GPU:
+
 1. Create new worker on Kuzco website
 2. Create new tmux session:
 ```bash
@@ -100,9 +114,11 @@ docker run --restart=always --runtime=nvidia --gpus "device=1" \
     --code YOUR_CODE
 ```
 
-## Useful Commands
+---
 
-Monitor your setup:
+## 📊 Monitoring Commands
+
+### Basic Commands
 ```bash
 # List tmux sessions
 tmux ls
@@ -117,29 +133,38 @@ nvidia-smi
 tmux attach -t kuzco0
 ```
 
-## Tips for Mining
+---
+
+## ⚡ Mining Compatibility
+
+### Important Guidelines
 - Wait for worker initialization (up to 10 minutes)
 - Monitor temperatures closely
 - Not recommended with KawPoW or intensive algorithms
 - Test stability before mining alongside workers
 - Monitor power consumption carefully
 
-## Support
-- Join [Discord](https://discord.gg/kuzco)
-- Check [Documentation](https://docs.kuzco.xyz)
-- Visit [GitHub](https://github.com/context-labs)
-
-## Important Notes
+### Best Practices
 - Initialize one GPU at a time
 - Monitor your rig's stability
 - Keep track of power consumption
 - Ensure proper cooling
 - Back up your worker credentials
 
-## Disclaimer
+---
+
+## 🔗 Support Resources
+- Join [Discord](https://discord.gg/kuzco)
+- Check [Documentation](https://docs.kuzco.xyz)
+- Visit [GitHub](https://github.com/context-labs)
+
+---
+
+## ⚠️ Disclaimer
 Use at your own risk. Monitor hardware closely.
 
 ---
+
 <div align="center">
-Made with ❤️ by the Mining Community
+        <i>Made with ❤️ by [bokiko](https://github.com/bokiko) </i>
 </div>
