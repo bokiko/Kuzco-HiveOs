@@ -10,6 +10,12 @@ Setup guide for running Kuzco workers on HiveOS mining rigs with NVIDIA GPUs.
 [![GitHub](https://img.shields.io/badge/github-context--labs-black)](https://github.com/context-labs)
 
 </div>
+What is Kuzco?
+Kuzco Testnet is a distributed network where GPU owners can contribute their computing power to run AI inference tasks for large language models like Llama3, Mistral, and others. As a testnet operator, you can earn $KZO points by connecting your GPUs to the network. The earning potential scales with the number of GPUs you contribute.
+
+⚠️ Important Note: Kuzco Testnet is in early development. Expect occasional bugs and downtime periods. The team actively communicates updates through the Operator Discord. While not yet production-ready, the network is continuously being improved and enhanced.
+
+For bug reports or issues, please open a ticket in Discord with detailed information. Stay updated about network status through the Discord announcements channel.
 
 ## ⚠️ Important Requirements
 
