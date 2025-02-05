@@ -1,41 +1,26 @@
-# Kuzco Worker Setup for Mining Rigs using HiveOs
+# Kuzco Worker Setup for HiveOS Mining Rigs
 
 <div align="center">
 
 <img src="https://avatars.githubusercontent.com/u/125929854?s=200&v=4" alt="Kuzco Logo" width="200"/>
 
-Setup guide for running Kuzco workers on mining rigs with NVIDIA GPUs.
+Setup guide for running Kuzco workers on HiveOS mining rigs with NVIDIA GPUs.
 
-[![Discord](https://img.shields.io/discord/YOUR_DISCORD_ID)](https://discord.gg/kuzco)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Documentation](https://img.shields.io/badge/docs-kuzco-blue)](https://docs.kuzco.xyz/)
 [![GitHub](https://img.shields.io/badge/github-context--labs-black)](https://github.com/context-labs)
 
 </div>
 
-## ⚠️ Safety Requirements
+## ⚠️ Important Requirements
 
-Before proceeding with installation, ensure:
+Before starting, ensure you have:
+- HiveOS updated to latest version
+- NVIDIA drivers updated
+- 16GB RAM minimum
+- All mining operations stopped
+- Stable internet connection
 
-- [ ] All mining operations are stopped
-- [ ] GPUs are at idle state
-- [ ] System is stable and updated
-- [ ] Adequate cooling is available
-- [ ] Power supply can handle peak loads
-
-## Table of Contents
-
-- [Hardware Requirements](#hardware-requirements)
-- [Installation](#installation)
-- [Worker Setup](#worker-setup)
-- [Multi-GPU Configuration](#multi-gpu-configuration)
-- [Monitoring](#monitoring)
-- [Troubleshooting](#troubleshooting)
-- [Mining Compatibility](#mining-compatibility)
-
-## Hardware Requirements
-
-### Supported GPUs:
+## Supported GPUs
 - NVIDIA RTX 4090
 - NVIDIA RTX 4080
 - NVIDIA RTX 3090 Ti
@@ -44,81 +29,62 @@ Before proceeding with installation, ensure:
 - NVIDIA RTX 3080
 - NVIDIA A100
 
-For detailed hardware specifications and requirements, visit the [official hardware documentation](https://docs.kuzco.xyz/hardware).
+For detailed specifications, visit [hardware requirements](https://docs.kuzco.xyz/hardware).
 
-Additional Requirements:
-- HiveOS or Linux-based mining OS
-- Docker support
-- SSH access
-- Stable internet connection
-- At least 16GB system RAM
-- Sufficient power supply for full GPU utilization
-- Update both HiveOs and Nvidia Drivers before begining
+## Step-by-Step Installation
 
-## Installation
-
-### 1. Docker Setup
+### 1. Update System & Install Required Packages
 ```bash
 # Update system
 sudo apt update
 
+# Install tmux if not already installed
+sudo apt install -y tmux
+```
+
+### 2. Install Docker
+```bash
 # Install Docker
 sudo apt install -y docker.io
 sudo systemctl start docker
 sudo systemctl enable docker
 ```
 
-### 2. NVIDIA Container Toolkit
+### 3. Create Kuzco Account
+1. Visit [kuzco.xyz/register](https://kuzco.xyz/register)
+2. Create your account and verify email
+3. Connect your Discord account
+4. Navigate to "Workers" tab
+5. Click "Create Worker" and save your worker ID and code
+
+### 4. Start Your Worker
+
+Create a new tmux session:
 ```bash
-# Add NVIDIA repository
-curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg
-
-curl -s -L https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list | \
-    sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' | \
-    sudo tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
-
-# Install toolkit
-sudo apt update
-sudo apt install -y nvidia-container-toolkit
-sudo nvidia-ctk runtime configure --runtime=docker
-sudo systemctl restart docker
+tmux new -s kuzco0
 ```
 
-## Worker Setup
-
-### 1. Account Creation
-1. Register at [kuzco.xyz/register](https://kuzco.xyz/register)
-2. Verify email
-3. Connect Discord account
-4. Create worker in dashboard
-
-### 2. Single GPU Setup
+Inside the tmux session, run your worker (replace with your credentials):
 ```bash
-# Create tmux session
-tmux new -s kuzco0
-
-# Run worker (replace credentials)
 docker run --restart=always --runtime=nvidia --gpus "device=0" \
     -e CACHE_DIRECTORY=/root/models \
     -v ~/.kuzco/models:/root/models \
     kuzcoxyz/amd64-ollama-nvidia-worker \
     --worker YOUR_WORKER_ID \
     --code YOUR_CODE
-
-# Detach from tmux: Ctrl+B, then D
 ```
 
-## Multi-GPU Configuration
+To detach from tmux: Press `Ctrl+B`, then `D`
 
-For additional GPUs:
+### 5. Running Multiple GPUs
 
-1. Create new worker on dashboard
-2. Launch new tmux session:
+For each additional GPU:
+1. Create new worker on Kuzco website
+2. Create new tmux session:
 ```bash
-tmux new -s kuzco1  # Increment for each GPU
+tmux new -s kuzco1  # Use kuzco2 for third GPU, etc.
 ```
-
-3. Run worker with modified device number:
+3. Run worker with different device number:
 ```bash
 docker run --restart=always --runtime=nvidia --gpus "device=1" \
     -e CACHE_DIRECTORY=/root/models \
@@ -128,75 +94,46 @@ docker run --restart=always --runtime=nvidia --gpus "device=1" \
     --code YOUR_CODE
 ```
 
-## Monitoring
+## Useful Commands
 
-### Commands
+Monitor your setup:
 ```bash
 # List tmux sessions
 tmux ls
 
-# Check containers
+# List running containers
 docker ps
 
-# GPU status
+# Check GPU status
 nvidia-smi
 
-# Attach to session
+# Reattach to tmux session
 tmux attach -t kuzco0
 ```
 
-### Health Checks
-- Monitor temperatures
-- Watch power consumption
-- Check worker status in dashboard
-- Verify system stability
-
-## Mining Compatibility
-
-### ⚠️ Important Notes
+## Tips for Mining
+- Wait for worker initialization (up to 10 minutes)
+- Monitor temperatures closely
 - Not recommended with KawPoW or intensive algorithms
-- Monitor power consumption closely
-- Ensure adequate cooling
-- Start with lighter algorithms if mining
-- Consider reducing mining intensity
-- Test stability before running alongside mining operations
-
-## Troubleshooting
-
-### Common Issues
-
-1. Docker fails to start:
-```bash
-sudo systemctl status docker
-```
-
-2. GPU not detected:
-```bash
-nvidia-smi
-```
-
-3. Container crashes:
-```bash
-docker logs $(docker ps -q --filter ancestor=kuzcoxyz/amd64-ollama-nvidia-worker)
-```
+- Test stability before mining alongside workers
+- Monitor power consumption carefully
 
 ## Support
+- Join [Discord](https://discord.gg/kuzco)
+- Check [Documentation](https://docs.kuzco.xyz)
+- Visit [GitHub](https://github.com/context-labs)
 
-- Join [Discord](https://discord.gg/kuzco) for support
-- Check [Official Documentation](https://docs.kuzco.xyz)
-- Visit [GitHub Repository](https://github.com/context-labs)
-- Report issues in [GitHub Issues](issues)
+## Important Notes
+- Initialize one GPU at a time
+- Monitor your rig's stability
+- Keep track of power consumption
+- Ensure proper cooling
+- Back up your worker credentials
 
 ## Disclaimer
-
-Use at your own risk. Monitor hardware closely. Authors not responsible for damage.
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+Use at your own risk. Monitor hardware closely.
 
 ---
-
 <div align="center">
 Made with ❤️ by the Mining Community
 </div>
