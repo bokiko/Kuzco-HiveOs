@@ -31,9 +31,11 @@ For bug reports or issues, please open a ticket in Discord with detailed informa
 ### System Requirements
 - HiveOS updated to latest version
 - NVIDIA drivers updated
-- 16GB RAM minimum
+- 16GB RAM minimum (required for multiple GPUs)
 - All mining operations stopped
 - Stable internet connection
+- Docker installed and running
+- NVIDIA Container Toolkit
 
 ### Supported GPUs
 - NVIDIA RTX 4090
@@ -55,26 +57,59 @@ For detailed specifications, visit [hardware requirements](https://docs.kuzco.xy
 # Update system
 sudo apt update
 
-# Install tmux if not already installed
-sudo apt install -y tmux
+# Install tmux and required packages
+sudo apt install -y tmux curl wget
 ```
 
 ### 2. Install Docker
 ```bash
+# Remove old Docker installations if present
+sudo apt-get remove docker docker-engine docker.io containerd runc
+
 # Install Docker
 sudo apt install -y docker.io
 sudo systemctl start docker
 sudo systemctl enable docker
 ```
 
-### 3. Create Kuzco Account
+### 3. Install NVIDIA Container Toolkit
+```bash
+# Add NVIDIA repository and GPG key
+curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg
+
+curl -s -L https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list | \
+    sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' | \
+    sudo tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
+
+# Install toolkit
+sudo apt-get update
+sudo apt-get install -y nvidia-container-toolkit
+
+# Configure Docker to use NVIDIA runtime
+sudo nvidia-ctk runtime configure --runtime=docker
+sudo systemctl restart docker
+
+# Test NVIDIA Docker setup
+docker run --rm --gpus all nvidia/cuda:11.0.3-base nvidia-smi
+```
+
+### 4. Configure iptables (if needed)
+If you encounter Docker network errors:
+```bash
+# Switch to iptables-legacy
+sudo update-alternatives --set iptables /usr/sbin/iptables-legacy
+sudo update-alternatives --set ip6tables /usr/sbin/ip6tables-legacy
+sudo systemctl restart docker
+```
+
+### 5. Create Kuzco Account
 1. Visit [kuzco.xyz/register](https://kuzco.xyz/register)
 2. Create your account and verify email
 3. Connect your Discord account
 4. Navigate to "Workers" tab
 5. Click "Create Worker" and save your worker ID and code
 
-### 4. Start Your Worker
+### 6. Start Your Worker
 
 Create a new tmux session:
 ```bash
@@ -90,8 +125,7 @@ docker run --restart=always --runtime=nvidia --gpus "device=0" \
     --worker YOUR_WORKER_ID \
     --code YOUR_CODE
 ```
-Edit the command by adding your `YOUR_WORKER_ID` and `YOUR_CODE` you copied earlier
-.
+Replace `YOUR_WORKER_ID` and `YOUR_CODE` with your credentials.
 
 To detach from tmux: Press `Ctrl+B`, then `D`
 
@@ -108,13 +142,18 @@ tmux new -s kuzco1  # Use kuzco2 for third GPU, etc.
 ```
 3. Run worker with different device number:
 ```bash
-docker run --restart=always --runtime=nvidia --gpus "device=0" -e CACHE_DIRECTORY=/root/models -v ~/.kuzco/models:/root/models kuzcoxyz/amd64-ollama-nvidia-worker --worker YOUR_WORKER_ID --code YOUR_CODE
-
+docker run --restart=always --runtime=nvidia --gpus "device=1" \
+    -e CACHE_DIRECTORY=/root/models \
+    -v ~/.kuzco/models:/root/models \
+    kuzcoxyz/amd64-ollama-nvidia-worker \
+    --worker YOUR_WORKER_ID \
+    --code YOUR_CODE
 ```
+Note: Change `device=1` to `device=2` for third GPU, etc.
 
 ---
 
-## 📊 Monitoring Commands
+## 📊 Monitoring and Troubleshooting
 
 ### Basic Commands
 ```bash
@@ -127,8 +166,31 @@ docker ps
 # Check GPU status
 nvidia-smi
 
+# Check container logs
+docker logs $(docker ps | grep kuzco | awk '{print $1}')
+
 # Reattach to tmux session
 tmux attach -t kuzco0
+```
+
+### Common Issues and Solutions
+
+1. Docker service fails to start:
+```bash
+sudo systemctl status docker
+journalctl -xeu docker.service
+```
+
+2. "Unknown runtime: nvidia" error:
+- Follow NVIDIA Container Toolkit installation steps
+- Verify installation with test command
+
+3. Duplicate tmux session:
+```bash
+# Kill existing session
+tmux kill-session -t kuzco0
+# Create new session
+tmux new -s kuzco0
 ```
 
 ---
@@ -164,5 +226,5 @@ Use at your own risk. Monitor hardware closely.
 ---
 
 <div align="center">
-        <i>Made with ❤️ by [bokiko](https://github.com/bokiko) </i>
+<i>Made with ❤️ by [bokiko](https://github.com/bokiko)</i>
 </div>
