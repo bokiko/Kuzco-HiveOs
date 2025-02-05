@@ -108,12 +108,8 @@ tmux new -s kuzco1  # Use kuzco2 for third GPU, etc.
 ```
 3. Run worker with different device number:
 ```bash
-docker run --restart=always --runtime=nvidia --gpus "device=1" \
-    -e CACHE_DIRECTORY=/root/models \
-    -v ~/.kuzco/models:/root/models \
-    kuzcoxyz/amd64-ollama-nvidia-worker \
-    --worker YOUR_WORKER_ID \
-    --code YOUR_CODE
+docker run --restart=always --runtime=nvidia --gpus "device=0" -e CACHE_DIRECTORY=/root/models -v ~/.kuzco/models:/root/models kuzcoxyz/amd64-ollama-nvidia-worker --worker YOUR_WORKER_ID --code YOUR_CODE
+
 ```
 
 ---
