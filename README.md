@@ -1,104 +1,52 @@
 
-# Kuzco Worker Setup for HiveOS Mining Rigs
+# Kuzco Docker Setup for HiveOS
 
-<div align="center">
-  <img src="https://avatars.githubusercontent.com/u/125929854?s=200&v=4" alt="Kuzco Logo" width="200"/>
-
-  ### A Step-by-Step Guide for Running Kuzco Workers on HiveOS-based Rigs with NVIDIA GPUs
-
-  [![Documentation](https://img.shields.io/badge/docs-kuzco-blue)](https://docs.kuzco.xyz/)
-  [![GitHub](https://img.shields.io/badge/github-context--labs-black)](https://github.com/context-labs)
-</div>
-
----
-
-## 📑 Table of Contents
-- [Introduction](#introduction)
-- [Requirements](#requirements)
-- [Installation Guide](#installation-guide)
-  - [1. Update System & Install Basic Packages](#1-update-system--install-basic-packages)
-  - [2. Install Docker](#2-install-docker)
-  - [3. Install NVIDIA Container Toolkit](#3-install-nvidia-container-toolkit)
-  - [4. Configure iptables (if needed)](#4-configure-iptables-if-needed)
-  - [5. Create Kuzco Account](#5-create-kuzco-account)
-  - [6. Start Your First Worker](#6-start-your-first-worker)
-- [Multiple GPU Setup Using a Script](#multiple-gpu-setup-using-a-script)
-  - [Staggered Startup Script](#staggered-startup-script)
-- [Monitoring & Troubleshooting](#monitoring--troubleshooting)
-- [Upgrading / Updating Your Worker](#upgrading--updating-your-worker)
-- [Mining Compatibility](#mining-compatibility)
-- [FAQ](#faq)
-- [Support Resources](#support-resources)
-- [Disclaimer](#disclaimer)
-
----
-
-## Introduction
-
-### What is Kuzco?
-
-Kuzco Testnet is a decentralized network where GPU owners can run AI inference tasks for large language models (e.g., Llama3, Mistral). As an operator, you earn **$KZO points** for each GPU you contribute, with earnings increasing as you add more GPUs.
-
-### ⚠️ Important Note
-
-Kuzco is in **early development**. Occasional bugs or downtime may occur. Join the official Discord for real-time updates. If you encounter issues, please open a ticket with detailed information and stay tuned for maintenance announcements or new releases.
+Welcome to the Kuzco Docker Setup guide for HiveOS. This guide explains how to deploy your Kuzco Worker on HiveOS using Docker. If you need further help, please join our Discord community.
 
 ---
 
 ## Requirements
 
-### System Requirements
-- **HiveOS** updated to the latest version.
-- **NVIDIA drivers** up-to-date.
-- **Minimum 16GB RAM** (especially for multiple GPUs).
-- **No active mining** – stop all mining operations before proceeding.
-- **Stable internet connection**.
-- **Docker** installed and running.
-- **NVIDIA Container Toolkit** installed.
-
-### Supported GPUs
-- NVIDIA RTX 4090
-- NVIDIA RTX 4080
-- NVIDIA RTX 3090 Ti
-- NVIDIA RTX 3090
-- NVIDIA RTX 3080 Ti
-- NVIDIA RTX 3080
-- NVIDIA A100
-
-For more details, refer to the [Kuzco Hardware Requirements](https://docs.kuzco.xyz/hardware).
+- **HiveOS:** Updated to the latest version
+- **GPU:** An NVIDIA GPU from our [Supported Hardware List](https://docs.kuzco.xyz/hardware)
+- **Docker:** Installed and running (HiveOS includes Docker by default)
+- **NVIDIA Container Toolkit:** Installed
+- **Kuzco Account:** Registered at [kuzco.xyz/register](https://kuzco.xyz/register) with your Worker ID and Code
 
 ---
 
-## Installation Guide
+## Setting Up Your Environment on HiveOS
 
-### 1. Update System & Install Basic Packages
-Run the following commands to update your system and install essential utilities including **nano** (a simple text editor):
+### 1. Update Your System and Install Basic Packages
+
+Even though HiveOS comes with many utilities, you may want to ensure your system is updated and that you have a simple text editor like **nano** available:
 ```bash
 sudo apt update
-sudo apt install -y tmux curl wget nano
+sudo apt install -y nano curl wget
 ```
 
-### 2. Install Docker
-To ensure a clean installation, remove any old versions of Docker before installing:
+### 2. Verify Docker Installation
+
+HiveOS typically includes Docker. Confirm it’s running with:
 ```bash
-sudo apt-get remove docker docker-engine docker.io containerd runc
-sudo apt install -y docker.io
+docker ps
+```
+If Docker isn’t running, start it with:
+```bash
 sudo systemctl start docker
-sudo systemctl enable docker
 ```
 
-### 3. Install NVIDIA Container Toolkit
+### 3. Install or Verify the NVIDIA Container Toolkit
 
-> **Note**:  
-> For Ubuntu 18.04 use `ubuntu18.04`, and for Ubuntu 22.04 use `ubuntu22.04` as the distribution value.
+Ensure your system can access your NVIDIA GPU through Docker:
 
-1. **Remove Old or Conflicting Repositories**:
+1. **Remove any old or conflicting repositories:**
    ```bash
    grep -r "nvidia.github.io" /etc/apt/sources.list* 2>/dev/null
    sudo rm /etc/apt/sources.list.d/nvidia-container-toolkit.list 2>/dev/null
    sudo rm /etc/apt/sources.list.d/libnvidia-container.list 2>/dev/null
    ```
-2. **Add the NVIDIA Repository and GPG Key**:
+2. **Add the NVIDIA Repository and GPG Key:**
    ```bash
    distribution=$(. /etc/os-release; echo $ID$VERSION_ID)
    curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey \
@@ -108,96 +56,77 @@ sudo systemctl enable docker
        | sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' \
        | sudo tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
    ```
-3. **Install the Toolkit**:
+3. **Install the NVIDIA Container Toolkit:**
    ```bash
    sudo apt-get update
    sudo apt-get install -y nvidia-container-toolkit
    ```
-4. **Configure Docker to Use the NVIDIA Runtime**:
+4. **Configure Docker to use the NVIDIA runtime:**
    ```bash
    sudo nvidia-ctk runtime configure --runtime=docker
    sudo systemctl restart docker
    ```
-5. **Test the Setup**:
+5. **Test GPU visibility:**
    ```bash
    docker run --rm --gpus all nvidia/cuda:11.0.3-base nvidia-smi
    ```
-   If your GPU information is displayed, the configuration is successful.
+   If your GPU details appear, the setup is successful.
 
-### 4. Configure iptables (if needed)
-If you encounter Docker networking issues, configure iptables to use the legacy version:
-```bash
-sudo update-alternatives --set iptables /usr/sbin/iptables-legacy
-sudo update-alternatives --set ip6tables /usr/sbin/ip6tables-legacy
-sudo systemctl restart docker
-```
+### 4. Create Your Kuzco Account and Get Your Credentials
 
-### 5. Create Kuzco Account
-1. Visit [kuzco.xyz/register](https://kuzco.xyz/register).  
-2. Create and verify your account.  
-3. Connect your Discord account.  
-4. Click **Create Worker** in the **Workers** tab.  
-5. Save your **Worker ID** and **Code** for later use.
-
-### 6. Start Your First Worker
-1. **Open a tmux Session** (optional – this is for a single GPU; however, for multiple GPUs, we recommend using the script method explained below):
-   ```bash
-   tmux new -s kuzco0
-   ```
-2. **Run the Worker Container** (replace `YOUR_WORKER_ID` and `YOUR_CODE` with your credentials):
-   ```bash
-   docker run --restart=always --runtime=nvidia --gpus "device=0" \
-       -e CACHE_DIRECTORY=/root/models \
-       -v ~/.kuzco/models:/root/models \
-       kuzcoxyz/amd64-ollama-nvidia-worker \
-       --worker YOUR_WORKER_ID \
-       --code YOUR_CODE
-   ```
-3. **Detach from tmux** by pressing **Ctrl+B** then **D**.
+1. Visit [kuzco.xyz/register](https://kuzco.xyz/register) to create and verify your account.
+2. Connect your Discord account.
+3. In the "Workers" tab on your dashboard, click **Create Worker**.
+4. Save your **Worker ID** and **Code** for later use.
 
 ---
 
-## Multiple GPU Setup Using a Script
+## Launching Your Kuzco Worker with Docker
 
-For systems with multiple GPUs, it is simpler and more maintainable to use a startup script. This method allows for easier future upgrades and ensures consistency across all GPU containers. In this approach, you define a container for each GPU you have (for example, name them `gpu0`, `gpu1`, etc.). Simply adjust the script to include as many containers as needed for your system.
+### Single GPU Setup
 
-### Staggered Startup Script
+To run your worker on a single GPU, use the following command (replace `YOUR_WORKER_ID` and `YOUR_CODE` with your actual credentials):
+```bash
+docker run --restart=always --rm --runtime=nvidia --gpus all \
+  -e CACHE_DIRECTORY=/root/models \
+  -v ~/.kuzco/models:/root/models \
+  kuzcoxyz/amd64-ollama-nvidia-worker \
+  --worker YOUR_WORKER_ID --code YOUR_CODE
+```
+The `--restart=always` flag ensures your container will automatically restart if it crashes.
 
-Using a script helps manage startup delays (to avoid power spikes) and makes upgrades easier. You can edit the script with **nano** if needed. To open the script for editing, use:
+### Multiple GPU Setup Using a Script
+
+For systems with multiple GPUs, a startup script makes management and future upgrades much easier. Create a script named `run_kuzco.sh`:
 ```bash
 nano run_kuzco.sh
 ```
-
-Below is an example script. **Ensure you add a block for each GPU you have (e.g., gpu0 for the first GPU, gpu1 for the second, etc.).**
-
+Paste the following example into the file—update the GPU device numbers and add a block for each GPU (e.g., `gpu0`, `gpu1`, etc.) that your rig has:
 ```bash
 #!/bin/bash
 
-# Start Worker for GPU 0 (rename as gpu0)
+# Start Worker for GPU 0 (named gpu0)
 docker run -d --name gpu0 \
   --restart=always --runtime=nvidia --gpus "device=0" \
   -e CACHE_DIRECTORY=/root/models \
   -v ~/.kuzco/models:/root/models \
   kuzcoxyz/amd64-ollama-nvidia-worker \
-  --worker YOUR_WORKER_ID \
-  --code YOUR_CODE
+  --worker YOUR_WORKER_ID --code YOUR_CODE
 
 # Wait 3 minutes before starting the next container
 sleep 180
 
-# Start Worker for GPU 1 (rename as gpu1)
+# Start Worker for GPU 1 (named gpu1)
 docker run -d --name gpu1 \
   --restart=always --runtime=nvidia --gpus "device=1" \
   -e CACHE_DIRECTORY=/root/models \
   -v ~/.kuzco/models:/root/models \
   kuzcoxyz/amd64-ollama-nvidia-worker \
-  --worker YOUR_WORKER_ID \
-  --code YOUR_CODE
+  --worker YOUR_WORKER_ID --code YOUR_CODE
 
-# Repeat similar blocks for additional GPUs (e.g., gpu2, gpu3, etc.) as per the number of GPUs in your rig.
+# Repeat similar blocks for additional GPUs (e.g., gpu2, gpu3, etc.) as needed.
 ```
-
-Make the script executable and then run it:
+Make the script executable and run it:
 ```bash
 chmod +x run_kuzco.sh
 ./run_kuzco.sh
@@ -205,121 +134,60 @@ chmod +x run_kuzco.sh
 
 ---
 
-## Monitoring & Troubleshooting
+## Useful Docker Commands
 
-**Basic Commands:**
-```bash
-# List running Docker containers
-docker ps
-
-# Check GPU status
-nvidia-smi
-
-# Follow logs for a specific container (replace <container_name_or_ID> with the actual name or ID)
-docker logs -f <container_name_or_ID>
-```
-
-**Common Issues & Fixes:**
-1. **Docker Fails to Start**  
-   Check the Docker service status:
-   ```bash
-   sudo systemctl status docker
-   journalctl -xeu docker.service
-   ```
-2. **"Unknown runtime: nvidia" Error**  
-   - Verify the NVIDIA Container Toolkit installation.
-   - Test GPU visibility inside a Docker container:
-     ```bash
-     docker run --rm --gpus all nvidia/cuda:11.0.3-base nvidia-smi
-     ```
-3. **Container Fails to Run or Exits Unexpectedly**  
-   - Review the container logs:
-     ```bash
-     docker logs -f <container_name_or_ID>
-     ```
-   - Ensure that your Worker ID and Code are correctly specified.
-4. **Network Issues or IP Conflicts**  
-   - Confirm that iptables are set to legacy if you experience Docker networking issues:
-     ```bash
-     sudo update-alternatives --set iptables /usr/sbin/iptables-legacy
-     sudo update-alternatives --set ip6tables /usr/sbin/ip6tables-legacy
-     sudo systemctl restart docker
-     ```
+- **List running containers:**
+  ```bash
+  docker ps
+  ```
+- **View logs of a container:**
+  ```bash
+  docker logs -f <container_name_or_ID>
+  ```
+- **Stop a container:**
+  ```bash
+  docker stop <container_name_or_ID>
+  ```
+- **Remove a container:**
+  ```bash
+  docker rm <container_name_or_ID>
+  ```
 
 ---
 
-## Upgrading / Updating Your Worker
+## Upgrading Your Worker
 
-Before upgrading, check which containers are running:
+Before upgrading, see which containers are running:
 ```bash
 docker ps
 ```
-Then, follow these steps:
-
-1. **Stop and Remove Existing Containers:**
-   ```bash
-   docker stop gpu0 gpu1   # Include all container names as listed by docker ps
-   docker rm gpu0 gpu1     # Remove them after stopping
-   ```
-2. **Pull the Latest Worker Image:**
-   ```bash
-   docker pull kuzcoxyz/amd64-ollama-nvidia-worker
-   ```
-3. **Restart Your Containers Using the Script:**
-   ```bash
-   ./run_kuzco.sh
-   ```
-*Note: Only upgrade Docker if there’s a Docker-specific issue or version mismatch.*
-
----
-
-## Mining Compatibility
-
-- Allow up to **10 minutes** for the worker initialization.
-- Monitor GPU **temperatures** closely.
-- Initially, avoid heavy mining workloads (e.g., KawPoW) to ensure system stability.
-- Check power consumption and overall system stability before scaling up.
-
----
-
-## FAQ
-
-**Q: What if my GPU isn’t recognized in Docker?**  
-*A:* Verify the NVIDIA Container Toolkit installation and run:
+Then, stop and remove the existing containers:
 ```bash
-docker run --rm --gpus all nvidia/cuda:11.0.3-base nvidia-smi
+docker stop gpu0 gpu1   # Include all container names as listed by docker ps
+docker rm gpu0 gpu1
 ```
-
-**Q: Can I run multiple workers with the same Worker ID?**  
-*A:* Yes. You can use the same Worker ID/Code for multiple GPUs. To check your running containers, run:
+Pull the latest worker image:
 ```bash
-docker ps
+docker pull kuzcoxyz/amd64-ollama-nvidia-worker
 ```
-
-**Q: How do I view logs if something goes wrong?**  
-*A:* Use the following command (replace `<container_name_or_ID>` with the actual value):
+Finally, restart your containers using your script:
 ```bash
-docker logs -f <container_name_or_ID>
+./run_kuzco.sh
 ```
+*Note: Upgrade Docker itself only if you encounter Docker-specific issues.*
 
 ---
 
-## Support Resources
+## Deprecation Notice
 
-- [Discord Community](https://discord.gg/kuzco)  
-- [Kuzco Documentation](https://docs.kuzco.xyz)  
-- [GitHub: context-labs](https://github.com/context-labs)
+As of December 2024, the old `kuzcoxyz/worker` image is deprecated. Always use the `kuzcoxyz/amd64-ollama-nvidia-worker` image.
 
 ---
 
-## Disclaimer
-
-Use this guide at your own risk. Always monitor your hardware (temperatures, power consumption, and stability) during operations.
+This guide provides a simple, step-by-step approach to setting up your Kuzco Worker on HiveOS using Docker. If you run into any issues, refer to the Useful Docker Commands section or join our Discord community for assistance.
 
 <div align="center">
   <i>Made with ❤️ by <a href="https://github.com/bokiko">bokiko</a></i>
 </div>
 ```
-
-
 
