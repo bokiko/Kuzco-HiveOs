@@ -321,6 +321,5 @@ Use this guide at your own risk. Always monitor your hardware (temperatures, pow
 </div>
 ```
 
----
 
-This version is designed to be as clear and user-friendly as possible, with step-by-step instructions and commands that users can simply copy and paste. Let me know if you need further adjustments, sir.
+
